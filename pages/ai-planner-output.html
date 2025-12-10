@@ -1,1 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your AI Trip Plan | TRIP'1</title>
+  <link rel="stylesheet" href="../styles.css">
+  <script src="../firebase.js"></script>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="logo">TRIP'1</div>
+  <ul class="nav-links">
+    <li><a href="../index.html">Home</a></li>
+    <li><a href="my-trips.html">My Trips</a></li>
+  </ul>
+</nav>
+
+<section class="container">
+  <h1>Your AI Trip Plan</h1>
+  <p>Here’s your personalized itinerary based on your budget, destination, and travel dates.</p>
+
+  <div id="planOutput" class="feature-card" style="text-align:left;"></div>
+
+  <button id="saveTrip">Save Trip</button>
+</section>
+
+<script>
+// Load AI plan from browser storage
+const plan = JSON.parse(localStorage.getItem("ai-plan"));
+
+if (plan) {
+  document.getElementById("planOutput").innerHTML =
+    `<pre>${JSON.stringify(plan, null, 2)}</pre>`;
+} else {
+  document.getElementById("planOutput").innerHTML =
+    "<p>No plan found. Please generate one first.</p>";
+}
+
+document.getElementById("saveTrip").onclick = async () => {
+  const user = firebase.auth().currentUser;
+
+  if (!user) {
+    alert("Please log in first to save your trip.");
+    return;
+  }
+
+  await db.collection("trips").add({
+    userId: user.uid,
+    plan: plan,
+    createdAt: Date.now()
+  });
+
+  alert("Trip saved successfully!");
+  window.location.href = "my-trips.html";
+};
+</script>
+
+</body>
+</html>
 
