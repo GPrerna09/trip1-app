@@ -1,1 +1,76 @@
-<!-- placeholder for login.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Trips | TRIP'1</title>
+  <link rel="stylesheet" href="../styles.css">
+  <script src="../firebase.js"></script>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="logo">TRIP'1</div>
+  <ul class="nav-links">
+    <li><a href="../index.html">Home</a></li>
+    <li><a href="ai-planner-input.html">AI Planner</a></li>
+    <li><a href="dashboard.html">Dashboard</a></li>
+    <li><a href="#" id="logoutBtn">Logout</a></li>
+  </ul>
+</nav>
+
+<section class="container">
+  <h1>My Trips</h1>
+  <p>Here are all the itineraries you have saved.</p>
+
+  <div id="tripList"></div>
+</section>
+
+<script>
+auth.onAuthStateChanged(async (user) => {
+  if (!user) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  const tripList = document.getElementById("tripList");
+
+  const trips = await db.collection("trips")
+    .where("userId", "==", user.uid)
+    .orderBy("createdAt", "desc")
+    .get();
+
+  if (trips.empty) {
+    tripList.innerHTML = "<p>You have no saved trips yet.</p>";
+    return;
+  }
+
+  let html = "";
+
+  trips.forEach(doc => {
+    const trip = doc.data().plan;
+
+    html += `
+      <div class="feature-card" style="text-align:left;">
+        <h3>${trip.destination || "Trip"}</h3>
+        <pre>${JSON.stringify(trip, null, 2)}</pre>
+      </div>
+    `;
+  });
+
+  tripList.innerHTML = html;
+});
+
+// LOGOUT
+document.getElementById("logoutBtn").onclick = () => {
+  auth.signOut().then(() => {
+    window.location.href = "login.html";
+  });
+};
+</script>
+
+</body>
+</html>
+
